@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User as UserIcon, LogIn, UserPlus } from 'lucide-react';
+import { User as UserIcon, LogIn, UserPlus, Moon, Sun } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
 interface NavigationProps {
@@ -8,14 +8,18 @@ interface NavigationProps {
   user: User | null;
   onLogin: () => void;
   onSignup: () => void;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ 
-  activeItem, 
-  setActiveItem, 
-  user, 
-  onLogin, 
-  onSignup 
+const Navigation: React.FC<NavigationProps> = ({
+  activeItem,
+  setActiveItem,
+  user,
+  onLogin,
+  onSignup,
+  isDarkMode,
+  onToggleDarkMode
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -47,8 +51,8 @@ const Navigation: React.FC<NavigationProps> = ({
   const navItems = user ? userNavItems : publicNavItems;
 
   return (
-    <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 shadow-lg backdrop-blur-md' : 'bg-white/80 backdrop-blur-sm'} border-b border-gray-200`}
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isDarkMode ? (scrolled ? 'bg-gray-900/95 shadow-lg backdrop-blur-md border-b border-gray-700' : 'bg-gray-900/80 backdrop-blur-sm border-b border-gray-700') : (scrolled ? 'bg-white/95 shadow-lg backdrop-blur-md border-b border-gray-200' : 'bg-white/80 backdrop-blur-sm border-b border-gray-200')}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -69,8 +73,8 @@ const Navigation: React.FC<NavigationProps> = ({
                   onClick={() => setActiveItem(item.id)}
                   className={`relative px-3 py-2 text-base lg:text-lg font-medium transition-all duration-300 overflow-hidden ${
                     activeItem === item.id
-                      ? "text-black"
-                      : "text-gray-600 hover:text-black"
+                      ? isDarkMode ? "text-white" : "text-black"
+                      : isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-black"
                   }`}
                 >
                   <span className="relative z-10">{item.label}</span>
@@ -85,11 +89,19 @@ const Navigation: React.FC<NavigationProps> = ({
               ))}
             </div>
             
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={onToggleDarkMode}
+              className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
             {/* Auth Buttons */}
             {user ? (
               <button
                 onClick={() => setActiveItem('dashboard')}
-                className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors duration-200"
+                className={`flex items-center gap-2 ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} px-4 py-2 rounded-lg transition-colors duration-200`}
               >
                 <UserIcon className="w-4 h-4" />
                 Dashboard
@@ -98,14 +110,14 @@ const Navigation: React.FC<NavigationProps> = ({
               <div className="flex items-center gap-3">
                 <button
                   onClick={onLogin}
-                  className="flex items-center gap-2 text-gray-600 hover:text-black transition-colors duration-200"
+                  className={`flex items-center gap-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'}`}
                 >
                   <LogIn className="w-4 h-4" />
                   Login
                 </button>
                 <button
                   onClick={onSignup}
-                  className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors duration-200"
+                  className={`flex items-center gap-2 ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'} px-4 py-2 rounded-lg transition-colors duration-200`}
                 >
                   <UserPlus className="w-4 h-4" />
                   Sign Up

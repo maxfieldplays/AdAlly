@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { useAuth, AuthProvider } from "./contexts/AuthContext";
 import Navigation from "./components/Navigation";
 import VideoModal from "./components/VideoModal";
@@ -10,6 +10,21 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import DashboardPage from "./pages/DashboardPage";
 import PricingPage from "./pages/PricingPage";
+
+interface DarkModeContextType {
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+}
+
+const DarkModeContext = createContext<DarkModeContextType | undefined>(undefined);
+
+export const useDarkMode = () => {
+  const context = useContext(DarkModeContext);
+  if (context === undefined) {
+    throw new Error('useDarkMode must be used within DarkModeProvider');
+  }
+  return context;
+};
 
 const videoData = [
   {
@@ -164,8 +179,18 @@ function AppContent() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const { user, loading } = useAuth();
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
 
   const handleVideoPlay = (video: (typeof videoData)[0]) => {
     setSelectedVideo(video);
@@ -246,18 +271,21 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <Navigation 
-        activeItem={activeItem} 
-        setActiveItem={setActiveItem}
-        user={user}
-        onLogin={handleLogin}
-        onSignup={handleSignup}
-      />
+    <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+      <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+        {/* Navigation */}
+        <Navigation
+          activeItem={activeItem}
+          setActiveItem={setActiveItem}
+          user={user}
+          onLogin={handleLogin}
+          onSignup={handleSignup}
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={toggleDarkMode}
+        />
 
-      {/* Page Content */}
-      {activeItem === "home" && (
+        {/* Page Content */}
+        {activeItem === "home" && (
         <HomePage 
           videoData={videoData}
           imageData={imageData}
@@ -265,51 +293,52 @@ function AppContent() {
           onImageView={handleImageView}
           onStartCreating={handleStartCreating}
         />
-      )}
-      {activeItem === "portfolio" && (
-        <PortfolioPage
-          videoData={videoData}
-          onVideoPlay={handleVideoPlay}
-          onBack={handleBackToHome}
+        )}
+        {activeItem === "portfolio" && (
+          <PortfolioPage
+            videoData={videoData}
+            onVideoPlay={handleVideoPlay}
+            onBack={handleBackToHome}
+          />
+        )}
+        {activeItem === "about" && (
+          <AboutPage onBack={handleBackToHome} />
+        )}
+        {activeItem === "contact" && (
+          <ContactPage onBack={handleBackToHome} />
+        )}
+        {activeItem === "pricing" && (
+          <PricingPage
+            onBack={handleBackToHome}
+            onContactClick={() => setActiveItem("contact")}
+          />
+        )}
+        {activeItem === "dashboard" && user && (
+          <DashboardPage />
+        )}
+
+        {/* Video Modal */}
+        <VideoModal
+          video={selectedVideo}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
         />
-      )}
-      {activeItem === "about" && (
-        <AboutPage onBack={handleBackToHome} />
-      )}
-      {activeItem === "contact" && (
-        <ContactPage onBack={handleBackToHome} />
-      )}
-      {activeItem === "pricing" && (
-        <PricingPage
-          onBack={handleBackToHome}
-          onContactClick={() => setActiveItem("contact")}
+
+        {/* Image Modal */}
+        <ImageModal
+          image={selectedImage}
+          isOpen={isImageModalOpen}
+          onClose={handleCloseImageModal}
         />
-      )}
-      {activeItem === "dashboard" && user && (
-        <DashboardPage />
-      )}
 
-      {/* Video Modal */}
-      <VideoModal
-        video={selectedVideo}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-      />
-
-      {/* Image Modal */}
-      <ImageModal
-        image={selectedImage}
-        isOpen={isImageModalOpen}
-        onClose={handleCloseImageModal}
-      />
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        initialMode={authMode}
-      />
-    </div>
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          initialMode={authMode}
+        />
+      </div>
+    </DarkModeContext.Provider>
   );
 }
 
@@ -322,3 +351,4 @@ function App() {
 }
 
 export default App;
+export { DarkModeContext };

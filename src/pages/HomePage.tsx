@@ -4,6 +4,7 @@ import AnimatedStatsCard from '../AnimatedStatsCard';
 import VideoCarousel from '../components/VideoCarousel';
 import ImageCarousel from '../components/ImageCarousel';
 import Footer from '../components/Footer';
+import BenefitsCarousel from '../components/BenefitsCarousel';
 
 interface Video {
   id: number;
@@ -70,6 +71,9 @@ const HomePage: React.FC<HomePageProps> = ({
             <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
           </button>
         </div>
+
+        {/* Benefits Carousel */}
+        <BenefitsCarousel />
 
         {/* Video Ads Carousel */}
         <div className="w-full max-w-5xl mb-8">

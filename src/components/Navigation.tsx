@@ -44,7 +44,16 @@ const Navigation: React.FC<NavigationProps> = ({
     { id: "about", label: "About Us" },
   ];
 
-  const navItems = user ? userNavItems : publicNavItems;
+  const adminNavItems = [
+    { id: "home", label: "Home Page" },
+    { id: "portfolio", label: "Portfolio" },
+    { id: "pricing", label: "Pricing" },
+    { id: "admin-chat", label: "Chat Admin" },
+    { id: "dashboard", label: "Dashboard" },
+    { id: "about", label: "About Us" },
+  ];
+
+  const navItems = user?.email?.includes('admin') ? adminNavItems : user ? userNavItems : publicNavItems;
 
   return (
     <nav 
